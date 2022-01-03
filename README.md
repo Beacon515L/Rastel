@@ -1,4 +1,5 @@
 # Rastel - crowdsourced COVID-19 contact tracing
+![rastel.png](/url It's a terribly fishy pun.)
 ## Why the name?
 From Latin *rastellus*, diminuitive of *rastrum,* "rake", or more precisely "tool of scraping".  *Rastrum* is the origin of *rastro* in several Romance languages (esp. Portuguese and Spanish) where in addition to being this tool, it has the figurative meaning of being a trail left behind (either by such a tool, or more generally by anything).
 
@@ -309,4 +310,8 @@ loop every 5 minutes
         end
     end
     deactivate s
-end```
+end
+```
+## Acknowledgements
+* [Dominic Sayers' is_email()](https://isemail.info)
+* The Rastel logo is an adaptation of [this photo from the Taiwan Presidential Office's Flickr](https://flickr.com/photos/40092099@N04/49491845167) and [the generic *Terapontidae* drawing from Fishbase.](https://www.fishbase.de/summary/10626)
