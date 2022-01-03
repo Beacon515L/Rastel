@@ -61,7 +61,7 @@ IDK.  ASAP because there is a clear need, but I do also have a day job.  I am wo
 
 It is true that everything we know about Omicron suggests it is significantly less deadly than Delta, which it is comprehensively displacing.  It is also true that it is significantly more infectious and is likely to kill or harm people not so much through its own direct lethality, but by stressing the bandwidth of acute healthcare settings such as hospital inpatient and ICU wards such that people who require these services for reasons not necessarily connected with COVID may be turned away.
 
-It is also true that Omicron is, compared with Delta, highly vaccine-resistant, and natural (herd) immunity does not appear to be long-lasting or particularly effective, and the debilitating effects of
+It is also true that Omicron is, compared with Delta, highly vaccine-resistant, and natural (herd) immunity does not appear to be long-lasting or particularly effective, and the debilitating effects of long COVID remain an uncertain quantity.
 
 The scarier, though I hope less likely, possibility, is that if another variant were to mutate from Omicron, there is no guarantee such a mutation would follow the general pattern of viral evolution towards increased infectiousness at the expense of lethality.  This occurred during the 1918 influenza pandemic to devastating effect, it is theorized, [because the selection pressures were inverted](https://www.newyorker.com/magazine/1997/09/29/the-dead-zone) - mildly ill soldiers remained at their posts, while the gravely ill were shipped to crowded hospital facilities.
 
