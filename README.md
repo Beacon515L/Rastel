@@ -14,7 +14,7 @@ Rastel is a client-server application which implements rudimentary contact-traci
 
 The specific motivator was [this press conference by Scott Morrison](https://www.youtube.com/watch?v=_f281eNIa7Y), Prime Minister of Australia, where he announced changes to the close contact definition essentially to ratify their lack of policy foresight in demanding a return to a suppression strategy without any adequate provision or requisition for PCR or rapid antigen testing, concurrently with the rise of Omicron in Australia.  While some state governments have indicated an intention to push back on this, New South Wales - the most populous state and where Morrison's electorate is - have not.
 
-Prior to this I had been concerned about the stresses placed on the contact tracing system, no doubt due to the immense case loads, but the redefinition of close contacts to requiring three or more hours of contact is, in my view, completely at odds with the infection rate of Omicron, and completely removes any confidence I had in the system.
+Prior to this I had been concerned about the stresses placed on the contact tracing system, no doubt due to the immense case loads, but the redefinition of close contacts to requiring four or more hours of contact is, in my view, completely at odds with the infection rate of Omicron, and completely removes any confidence I had in the system.
 
 So I built my own.  I have previous experience working with spatiotemporal correlation problems and realized I could adapt similar approaches to contact tracing.
 
