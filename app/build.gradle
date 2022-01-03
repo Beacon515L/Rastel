@@ -8,12 +8,14 @@ android {
 
     defaultConfig {
         applicationId "com.beacon515l.rastel"
-        minSdk 16
+        minSdk 19
         targetSdk 32
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        minSdkVersion defaultMinSdkVersion
+        targetSdkVersion defaultTargetSdkVersion
     }
 
     buildTypes {
@@ -45,4 +47,5 @@ dependencies {
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation 'com.google.android.gms:play-services-location:18.0.0'
 }
