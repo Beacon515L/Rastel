@@ -1,5 +1,6 @@
 package com.beacon515l.rastel
 
+import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
@@ -10,8 +11,7 @@ class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
     SQLiteOpenHelper(context, "RastelDB", factory, 1) {
 
     override fun onCreate(db: SQLiteDatabase) {
-        //Create the location recording table.
-        val query = ("CREATE TABLE location_recording (" +
+        var query = ("CREATE TABLE location_recording (" +
                 "recorded_date_time INTEGER PRIMARY KEY," +
                 "latitude NUMERIC," +
                 "longitude NUMERIC," +
@@ -31,7 +31,7 @@ class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
                 "locate_frequency INTEGER," +
                 "report_frequency INTEGER")
 
-        db.execSql(query)
+        db.execSQL(query)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, p1: Int, p2: Int) {
@@ -81,6 +81,7 @@ class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
     }
 
     //Retrieve the user configuration.
+    @SuppressLint("Range")
     fun getUserConfiguration(): UserConfiguration? {
         val user: UserConfiguration = UserConfiguration()
         val db = this.readableDatabase
@@ -89,12 +90,12 @@ class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
             return null
         }
         user.userId = cursor.getInt(cursor.getColumnIndex("user_id"))
-        user.email = cursor.getInt(cursor.getColumnIndex("email"))
-        user.password = cursor.getInt(cursor.getColumnIndex("password"))
-        user.token = cursor.getInt(cursor.getColumnIndex("bearer_token"))
+        user.email = cursor.getString(cursor.getColumnIndex("email"))
+        user.password = cursor.getString(cursor.getColumnIndex("password"))
+        user.token = cursor.getString(cursor.getColumnIndex("bearer_token"))
         user.state = cursor.getInt(cursor.getColumnIndex("service_status"))
         user.requestedState = cursor.getInt(cursor.getColumnIndex("requested_service_status"))
-        user.url = cursor.getInt(cursor.getColumnIndex("api_url"))
+        user.url = cursor.getString(cursor.getColumnIndex("api_url"))
         user.locateFrequency = cursor.getInt(cursor.getColumnIndex("locate_frequency"))
         user.reportFrequency = cursor.getInt(cursor.getColumnIndex("report_frequency"))
 

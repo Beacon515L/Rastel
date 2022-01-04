@@ -4,10 +4,11 @@ import android.annotation.SuppressLint
 import android.app.IntentService
 import android.content.Intent
 import android.content.Context
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.tasks.CancellationToken
 import com.google.android.gms.tasks.CancellationTokenSource
 
 private const val ACTION_LOCATE = "com.beacon515l.rastel.action.locate"
@@ -36,10 +37,6 @@ class RastelLocationService : IntentService("RastelLocationService") {
         }
     }
 
-    /**
-     * Handle action Foo in the provided background thread with the provided
-     * parameters.
-     */
     @SuppressLint("MissingPermission")
     private fun handleActionLocate() {
         val db = DBHelper(this,null)
@@ -49,28 +46,28 @@ class RastelLocationService : IntentService("RastelLocationService") {
             config = db.getUserConfiguration()
             if(config == null || !updateStatus(config,true)){
                 //Abort immediately if unable to retrieve config at all, or if this service should abort.
-                return void
+                return
             }
 
-            if(fusedLocationClient == null){
-                fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-            }
+            fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
 
             //In all other circumstances this service should run.  It is just a question of how often.
-            val delay = config.locateFrequency ?: RastelCommon.DEFAULT_LOCATE_FREQUENCY;
+            val delay = ((config.locateFrequency ?: RastelCommon.DEFAULT_LOCATE_FREQUENCY * 1000).toLong())
 
             //Get the current location and time.
             val cancellationTokenSource = CancellationTokenSource()
             val locationTask = fusedLocationClient
                 .getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, cancellationTokenSource.token)
-            if(locationTask != null){
+
                 //Synchronously await the task's result.
-                //This will wait up to thirty seconds, one second at a time.
+                //This will wait up to thirty seconds, fifty milliseconds at a time.
                 var i = 0
-                while (i < 30){
+                while (i < 600){
                     if(locationTask.isComplete){
                         break
                     }
+                    Thread.sleep(50)
                     i++
                 }
                 if(locationTask.isSuccessful){
@@ -78,15 +75,12 @@ class RastelLocationService : IntentService("RastelLocationService") {
                     val time = System.currentTimeMillis() / 1000
                     db.addLocation(location.latitude,location.longitude,time)
                 }
-            }
-            Thread.sleep((long) (config.locateFrequency ?: RastelCommon.DEFAULT_LOCATE_FREQUENCY * 1000))
+
+            Thread.sleep(delay)
         }
     }
 
-    /**
-     * Handle action Baz in the provided background thread with the provided
-     * parameters.
-     */
+
     private fun handleActionReport() {
         TODO("Handle action Report")
     }
@@ -127,60 +121,58 @@ class RastelLocationService : IntentService("RastelLocationService") {
         val state = config.state ?: RastelCommon.Companion.serviceStatus.STOP.code
         val requestedState = config.requestedState ?: RastelCommon.Companion.serviceStatus.STOP.code
         var finalState: Int
-        var locationServiceIsRunning: bool
-        var reportingServiceIsRunning: bool
+        var locationServiceIsRunning: Boolean = false
+        var reportingServiceIsRunning: Boolean = false
         val locationServiceShouldBeRunning = requestedState ==
-                    RastelCommon.Companion.serviceStatus.LOCATE_ONLY.value ||
-                requestedState == RastelCommon.Companion.serviceStatus.RUN.value
+                    RastelCommon.Companion.serviceStatus.LOCATE_ONLY.code ||
+                requestedState == RastelCommon.Companion.serviceStatus.RUN.code
         val reportingServiceShouldBeRunning = requestedState ==
-                RastelCommon.Companion.serviceStatus.REPORT_ONLY.value ||
-                requestedState == RastelCommon.Companion.serviceStatus.RUN.value
+                RastelCommon.Companion.serviceStatus.REPORT_ONLY.code ||
+                requestedState == RastelCommon.Companion.serviceStatus.RUN.code
 
         //The service which is calling this method is assumed to be running, and will be transitioning
         //to the requested state if necessary immediately after this call.
         if(isLocationService){
             locationServiceIsRunning = requestedState ==
-                    RastelCommon.Companion.serviceStatus.LOCATE_ONLY.value ||
-                    requestedState == RastelCommon.Companion.serviceStatus.BOTH.value
+                    RastelCommon.Companion.serviceStatus.LOCATE_ONLY.code ||
+                    requestedState == RastelCommon.Companion.serviceStatus.RUN.code
         }
         else {
             reportingServiceIsRunning = requestedState ==
-                    RastelCommon.Companion.serviceStatus.REPORT_ONLY.value ||
-                    requestedState == RastelCommon.Companion.serviceStatus.BOTH.value
+                    RastelCommon.Companion.serviceStatus.REPORT_ONLY.code ||
+                    requestedState == RastelCommon.Companion.serviceStatus.RUN.code
         }
 
         //The other service is assumed to be in whatever state is already being indicated.
         if(isLocationService){
             reportingServiceIsRunning = state ==
-                    RastelCommon.Companion.serviceStatus.REPORT_ONLY.value ||
-                    state == RastelCommon.Companion.serviceStatus.RUN.value
+                    RastelCommon.Companion.serviceStatus.REPORT_ONLY.code ||
+                    state == RastelCommon.Companion.serviceStatus.RUN.code
         }
         else {
             locationServiceIsRunning = state ==
-                    RastelCommon.Companion.serviceStatus.LOCATE_ONLY.value ||
-                    state == RastelCommon.Companion.serviceStatus.RUN.value
+                    RastelCommon.Companion.serviceStatus.LOCATE_ONLY.code ||
+                    state == RastelCommon.Companion.serviceStatus.RUN.code
         }
 
         //Despite all this, if Google Play Services aren't available, the Location service cannot run.
-        if(!GoogleAPIAvailability.isGooglePlayServicesAvailable()){
-            locationServiceIsRunning = false;
+        if(GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
+            != ConnectionResult.SUCCESS){
+            locationServiceIsRunning = false
         }
 
         //On this basis, now set the state.
-        if(locationServiceIsRunning){
+        finalState = if(locationServiceIsRunning){
             if(reportingServiceIsRunning){
-                finalState = RastelCommon.Companion.serviceStatus.RUN.code
+                RastelCommon.Companion.serviceStatus.RUN.code
+            } else {
+                RastelCommon.Companion.serviceStatus.LOCATE_ONLY.code
             }
-            else {
-                finalState = RastelCommon.Companion.serviceStatus.LOCATE_ONLY.code
-            }
-        }
-        else {
+        } else {
             if(reportingServiceIsRunning){
-                finalState = RastelCommon.Companion.serviceStatus.REPORT_ONLY.code
-            }
-            else {
-                finalState = RastelCommon.Companion.serviceStatus.Stop.code
+                RastelCommon.Companion.serviceStatus.REPORT_ONLY.code
+            } else {
+                RastelCommon.Companion.serviceStatus.STOP.code
             }
         }
 
@@ -190,11 +182,10 @@ class RastelLocationService : IntentService("RastelLocationService") {
         db.updateUserConfiguration(config)
 
         //Finally, return whether the requested service SHOULD continue running.
-        if(isLocationService){
-            return locationServiceIsRunning
-        }
-        else {
-            return reportingServiceIsRunning
+        return if(isLocationService){
+            locationServiceIsRunning
+        } else {
+            reportingServiceIsRunning
         }
     }
 }
