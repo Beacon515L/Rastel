@@ -41,14 +41,29 @@ class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
     }
 
     // Record a location.
-    fun addLocation(lat : Double, long : Double, time: Long ){
+    fun addLocation(lat : Double, long : Double, time: Long, status: Int ){
         val values = ContentValues()
         values.put("recorded_date_time", time)
         values.put("latitude", lat)
         values.put("longitude", long)
+        values.put("correlation_status", status)
         val db = this.writableDatabase
-        db.insert("location_recoding", null, values)
+        db.insertWithOnConflict("location_recoding", null, values,
+            SQLiteDatabase.CONFLICT_REPLACE)    //Allows the correlation status to be advanced
+                                                //As well as coordinate precision
         db.close()
+    }
+
+    fun addLocation(log: LogEntry){
+        addLocation(log.lat, log.long, log.time, when(log.correlation){
+            LogEntry.CorrelationStatus.LOCAL_ONLY_REJECTED -> -2
+            LogEntry.CorrelationStatus.LOCAL_ONLY -> -1
+            LogEntry.CorrelationStatus.UNCORRELATED -> 0
+            LogEntry.CorrelationStatus.CORRELATED -> 1
+            LogEntry.CorrelationStatus.FLAGGED -> 2
+            LogEntry.CorrelationStatus.NOTIFIED -> 3
+            else -> -2
+        })
     }
 
     // Update the user configuration.
